@@ -11,6 +11,6 @@ Functionality
 
   Due to event driven nature of vhdl ,tried to keep RTL as close to schematic as possible to reach tight timing constrains
 
-  Struggling with Zync programming , removed every architecture specific clocking resources such as MMCMn and DCM because they are not tested on real hardware. Memory buffer to hold packets has not been implemented ,so retransmission is not yet possible, only signal is sent to transmitter.
+Removed every architecture specific clocking resources such as MMCMn and DCM because they are not tested on real hardware. Memory buffer to hold packets has not been implemented(Not mentioned in Task) ,so retransmission is not yet possible, only signal is sent to transmitter.
 
-  Rough schematics mentioned with real signal names in schematic folder.
+Rough schematics mentioned with real signal names in schematic folder.
