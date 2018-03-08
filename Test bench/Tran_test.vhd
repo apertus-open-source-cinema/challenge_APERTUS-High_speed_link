@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------------
--- Tran_testr.vhd
+-- Tran_test.vhd
 -- Test bench for Transceiver
 --  Version 1.0
 --
