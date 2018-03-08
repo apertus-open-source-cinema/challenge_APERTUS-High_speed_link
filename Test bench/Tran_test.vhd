@@ -1,30 +1,15 @@
---------------------------------------------------------------------------------
--- Company:
--- Engineer:
+------------------------------------------------------------------------------
+-- Transceiver.vhd
 --
--- Create Date:   02:56:14 03/07/2018
--- Design Name:
--- Module Name:   C:/VLSI PRT/8086/Test/Gsoc/Tran_test.vhd
--- Project Name:  Gsoc
--- Target Device:
--- Tool versions:
--- Description:
+--  Version 1.0
 --
--- VHDL Test Bench Created by ISE for module: Transceiver
+--  Copyright (C) 2018 Arun Malik
 --
--- Dependencies:
---
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
---
--- Notes:
--- This testbench has been automatically generated using types std_logic and
--- std_logic_vector for the ports of the unit under test.  Xilinx recommends
--- that these types always be used for the top-level I/O of a design in order
--- to guarantee that the testbench will bind correctly to the post-implementation
--- simulation model.
---------------------------------------------------------------------------------
+--  This program is free software: you can redistribute it and/or
+--  modify it under the terms of the GNU General Public License
+--  as published by the Free Software Foundation, either version
+--  2 of the License, or (at your option) any later version.
+----------------------------------------------------------------------------
 LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
 
@@ -59,10 +44,10 @@ ARCHITECTURE behavior OF Tran_test IS
    signal rst : std_logic := '1';
    signal inr : std_logic := '0';
 
-	--BiDirs
+  --BiDirs
    signal outr : std_logic;
 
- 	--Outputs
+   --Outputs
    signal crcr : std_logic_vector(7 downto 0);
    signal crct : std_logic_vector(7 downto 0);
    signal regdata : std_logic_vector(7 downto 0);
@@ -74,7 +59,7 @@ ARCHITECTURE behavior OF Tran_test IS
 
 BEGIN
 
-	-- Instantiate the Unit Under Test (UUT)
+  -- Instantiate the Unit Under Test (UUT)
    uut: Transceiver PORT MAP (
           crcr => crcr,
           crct => crct,
@@ -90,26 +75,26 @@ BEGIN
    -- Clock process definitions
    clk_process :process
    begin
-		clk <= '0';
-		wait for clk_period/2;
-		clk <= '1';
-		wait for clk_period/2;
+    clk <= '0';
+    wait for clk_period/2;
+    clk <= '1';
+    wait for clk_period/2;
    end process;
 
-	rseeet:process
-	begin
-	wait for 300 ns;
-	rst<='0';
-	end process;
+  rseeet:process
+  begin
+  wait for 300 ns;
+  rst<='0';
+  end process;
 
-	inr_process: process(outr)
-	begin
-	if outr='1' then
-		inr<='1';
-	else
-	   inr<='0';
-	end if;
-	end process;
+  inr_process: process(outr)
+  begin
+  if outr='1' then
+    inr<='1';
+  else
+     inr<='0';
+  end if;
+  end process;
 
    -- Stimulus process
    stim_proc: process

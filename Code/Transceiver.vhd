@@ -1,14 +1,14 @@
 ------------------------------------------------------------------------------
 -- Transceiver.vhd
---	 
---	Version 1.0
+--
+--  Version 1.0
 --
 --  Copyright (C) 2018 Arun Malik
 --
---	This program is free software: you can redistribute it and/or
---	modify it under the terms of the GNU General Public License
---	as published by the Free Software Foundation, either version
---	2 of the License, or (at your option) any later version.
+--  This program is free software: you can redistribute it and/or
+--  modify it under the terms of the GNU General Public License
+--  as published by the Free Software Foundation, either version
+--  2 of the License, or (at your option) any later version.
 ----------------------------------------------------------------------------
 
 -- Pins of our interest are "clk", "rst" == which are internally operated,
@@ -25,31 +25,31 @@ use UNISIM.VComponents.all;
 
 entity Transceiver is
 port(
-	clk,rst   : in    std_logic;
-	outr      : inout std_logic;
-	inr       : in    std_logic;
-	regdata   : out   std_logic_vector(7 downto 0);
-	reg_out   : out   std_logic_vector(7 downto 0);
-	counter   : out   std_logic_vector(7 downto 0);
-	crcr,crct : out   std_logic_vector(7 downto 0));                  --CRC for receiver and transmitter respectively
+  clk,rst   : in    std_logic;
+  outr      : inout std_logic;
+  inr       : in    std_logic;
+  regdata   : out   std_logic_vector(7 downto 0);
+  reg_out   : out   std_logic_vector(7 downto 0);
+  counter   : out   std_logic_vector(7 downto 0);
+  crcr,crct : out   std_logic_vector(7 downto 0));        --CRC for receiver and transmitter respectively
 end Transceiver;
 
 architecture Behavioral of Transceiver is
 component Transmitter
 port(
-	clk,rst   : in    std_logic;
+  clk,rst   : in    std_logic;
    regdata   : out   std_logic_vector(7 downto 0);
-	crc_data  : out   std_logic_vector(7 downto 0);
-	outr      : inout std_logic);
+  crc_data  : out   std_logic_vector(7 downto 0);
+  outr      : inout std_logic);
 end component;
 
 component Receiver
 port(
-	inr     : in  std_logic;
-	clk     : in  std_logic;
-	crcr    : out std_logic_vector(7 downto 0);
-	reg_out : out std_logic_vector(7 downto 0);
-	counter : out std_logic_vector(7 downto 0));
+  inr     : in  std_logic;
+  clk     : in  std_logic;
+  crcr    : out std_logic_vector(7 downto 0);
+  reg_out : out std_logic_vector(7 downto 0);
+  counter : out std_logic_vector(7 downto 0));
 end component;
 
 begin
@@ -98,18 +98,17 @@ begin
 --    DSSEN                 => '0');
 
 tr_map :Transmitter port map(
-		clk      => clk,
-		rst      => rst,
-		crc_data => crct,
-		regdata  => regdata,
-		outr     => outr);
+  clk      => clk,
+  rst      => rst,
+  crc_data => crct,
+  regdata  => regdata,
+  outr     => outr);
 
 re_map :Receiver port map(
-		clk     => clk,
-		reg_out => reg_out,
-		counter => counter,
-		crcr    => crcr,
-		inr     => inr);
+  clk     => clk,
+  reg_out => reg_out,
+  counter => counter,
+  crcr    => crcr,
+  inr     => inr);
 
 end Behavioral;
-
