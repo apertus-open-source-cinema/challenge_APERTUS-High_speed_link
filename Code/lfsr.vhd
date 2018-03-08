@@ -1,4 +1,10 @@
-
+-------------------------------------------------------
+ -- Design Name : User Pakage
+ -- File Name   : lfsr_pkg.vhd
+ -- Function    : Defines function for LFSR
+ -- Coder       : Alexander H Pham (VHDL)
+-------------------------------------------------------
+  
 library ieee;
     use ieee.std_logic_1164.all;
     use ieee.std_logic_unsigned.all;
@@ -14,9 +20,9 @@ end;
 package body lfsr_pkg is
 
     function many_to_one_fb (DATA, TAPS :std_logic_vector) return std_logic_vector is
-        variable xor_taps :std_logic;
-        variable all_0s   :std_logic;
-        variable feedback :std_logic;
+        variable xor_taps : std_logic;
+        variable all_0s   : std_logic;
+        variable feedback : std_logic;
     begin
 
         -- Validate if lfsr = to zero (Prohibit Value)
