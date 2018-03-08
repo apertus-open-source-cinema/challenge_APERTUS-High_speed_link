@@ -24,14 +24,14 @@ end;
 package body lfsr_pkg is
 
     function rand_shift (DATA : std_logic_vector) return std_logic_vector is
-        variable feedback : std_logic;
+       variable feedback : std_logic;
        variable out_reg  : std_logic_vector(15 downto 0) := DATA;
     begin
 
-      feedback := not (out_reg(15) xor out_reg(14));
-      out_reg  := out_reg(14 downto 0) & feedback;
+       feedback := not (out_reg(15) xor out_reg(14));
+       out_reg  := out_reg(14 downto 0) & feedback;
 
-        return out_reg;
+       return out_reg;
 
     end function;
 end package body;

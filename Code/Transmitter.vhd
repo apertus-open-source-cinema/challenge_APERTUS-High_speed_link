@@ -23,9 +23,9 @@ generic (
    SYNC_CYCLE : integer := 4);                           --DCM requires a lot more than 4, keeping it short here
 
 port (
-  clk,rst          :in    std_logic;
-  crc_data,regdata :out   std_logic_vector(7 downto 0);   --For troubleshooting
-  outr             :inout std_logic);                     --Output
+   clk,rst          :in    std_logic;
+   crc_data,regdata :out   std_logic_vector(7 downto 0);   --For troubleshooting
+   outr             :inout std_logic);                     --Output
 
 end Transmitter;
 

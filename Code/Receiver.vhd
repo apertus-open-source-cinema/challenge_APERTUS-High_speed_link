@@ -46,10 +46,10 @@ pac_proc : process(inr,clk) is
 begin
 
   if falling_edge(clk) then
-     if sync = '0' then                                   --Detection loop , if reset is requested by transmitter
+     if sync = '0' then                                 --Detection loop , if reset is requested by transmitter
         sync_count := sync_count + 1;
 
-        if inr = '1' then                                    --Sets flag whenever clock edge is encountered ,means no reset
+        if inr = '1' then                               --Sets flag whenever clock edge is encountered ,means no reset
            sync_flag := '1';
         end if;
 
@@ -87,7 +87,7 @@ begin
      end if;
 
       if sync = '0' then                                  --start recieving packet, if not in sync stage
-         if pac_count < 2 then                               --Leaving first 2 bits
+         if pac_count < 2 then                            --Leaving first 2 bits
             pac_count := pac_count + 1;
 
          elsif pac_count  < 18 then
@@ -95,11 +95,11 @@ begin
                reg_data (byt_count)  <= inr;
                reg_shift (byt_count) <= '1';
 
-               if byt_count > 0 then                                --need to remove
+               if byt_count > 0 then                      --need to remove
                   reg_shift(byt_count-1) <= '0';
                end if;
 
-               newcrc(0) := inr xor crc(7);                         --Calculating crc
+               newcrc(0) := inr xor crc(7);               --Calculating crc
                newcrc(1) := inr xor crc(0) xor crc(7);
                newcrc(2) := inr xor crc(1) xor crc(7);
                newcrc(3) := crc(2);
@@ -138,7 +138,7 @@ begin
         end if;
       end if;
 
-      crcr    <= crc;                                  --Troubleshooting
+      crcr    <= crc;                                        --Troubleshooting
       reg_out <= reg_data;
   end if;
 
