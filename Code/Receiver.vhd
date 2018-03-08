@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------
 -- Receiver.vhd
---	
+--
 --	Version 1.0
 --
 --  Copyright (C) 2018 Arun Malik
@@ -25,7 +25,7 @@ port(
 	clk          : in  std_logic;
 	crcr,reg_out : out std_logic_vector(7 downto 0);		          --For troubleshooting
 	counter      : out std_logic_vector(7 downto 0));		          --Error counter
-	
+
 end Receiver;
 
 architecture Behavioral of Receiver is
@@ -117,7 +117,6 @@ begin
 						reg_shift(7 downto 0) <= x"00";
 						byt_count             := 0;
 				 end if;
-				 
 
 			elsif pac_count < 26 then
 					crc(pac_count - 18) := crc(pac_count - 18) xor inr;	--xoring crc tranmitted with calculated, correct if 0
@@ -125,19 +124,17 @@ begin
 
 			elsif pac_count < 28 then
 			      pac_count := pac_count + 1;
+						if crc=x"00" then
+							--inr<='0';										Left for now
 
-					if crc=x"00" then
-						--inr<='0';										Left for now
-
-					else 
-					   err_count <= err_count + 1;
-						--inr     <= '1';
-						crc       := x"00";
-					end if;
-					
+						else
+						   err_count <= err_count + 1;
+							--inr     <= '1';
+							 crc       := x"00";
+						end if;
 
 			elsif pac_count < 29 then
-				     pac_count := 0;
+				    pac_count := 0;
 					  newcrc    := "00000000";
 					  crc       := "00000000";
 			end if;

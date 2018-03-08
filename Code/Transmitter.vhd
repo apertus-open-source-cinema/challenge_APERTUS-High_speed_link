@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------
 -- Transmitter.vhd
---	
+--
 --	Version 1.0
 --
 --  Copyright (C) 2018 Arun Malik
@@ -69,14 +69,14 @@ begin
 				pac_count := 0;                       								--Reset Counter
 				reg_rst   <= '0';
 			end if;
-			
+
 		elsif pac_count=0 then															--Start bit
 			outr      <= '1';
 			pac_count := pac_count+1;
 
 		elsif pac_count=1 then															--Silence before storm
-		outr      <= '0';
-		pac_count := pac_count+1;
+		  outr      <= '0';
+		  pac_count := pac_count+1;
 
 		elsif pac_count<18 then															--Stays in loop until 16x(8+1) bit completes
 			if byt_count<8 then
@@ -110,7 +110,7 @@ begin
 				outr      <= crc(pac_count-18);
 				pac_count := pac_count+1;
 				reg_rst   <= '1';
-	
+
 		elsif pac_count=26 then															--1 cycles for Reciever to check CRC and drive the line
 				outr      <= 'Z';
 				reg_rst   <= '0';
@@ -127,8 +127,8 @@ begin
 				crc       := "00000000";
 				--pac_fault <= '0';
 		end if;
-			crc_data <= crc;																--Just for troubleshooting
-			regdata  <= reg_data;
+		crc_data <= crc;																--Just for troubleshooting
+		regdata  <= reg_data;
 	end if;
 end process;
 
