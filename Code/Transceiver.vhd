@@ -38,7 +38,7 @@ architecture Behavioral of Transceiver is
 component Transmitter
 port(
   clk,rst   : in    std_logic;
-   regdata   : out   std_logic_vector(7 downto 0);
+  regdata   : out   std_logic_vector(7 downto 0);
   crc_data  : out   std_logic_vector(7 downto 0);
   outr      : inout std_logic);
 end component;

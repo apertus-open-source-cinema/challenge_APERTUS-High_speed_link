@@ -20,7 +20,7 @@ use IEEE.std_logic_unsigned.all;
 entity Transmitter is
 generic (
    DPACK_LEN  : integer := 32;
-   SYNC_CYCLE : integer := 4);                    --DCM requires a lot more than 4, keeping it short here
+   SYNC_CYCLE : integer := 4);                           --DCM requires a lot more than 4, keeping it short here
 
 port (
   clk,rst          :in    std_logic;
@@ -45,90 +45,89 @@ pac_proc : process(clk,rst) is
 begin
 
   if rising_edge(clk) then
-  if rst='1' then
-  byt_count := 0;
-  pac_count := 0;
-  newcrc    := x"00";
-  crc       := x"00";
-  outr      <= 'Z';
-  reg_rst   <= '1';
-  sync      := '1';                                        --Always resets to sync
-  reg_shift <= x"00";
-  --pac_fault<='0';
-  elsif sync='1' then
-  pac_count := pac_count+1;
-  if pac_count<DPACK_LEN then                              --Greater then lenght of a single packet
-  outr <= '0';
+     if rst='1' then
+        byt_count := 0;
+        pac_count := 0;
+        newcrc    := x"00";
+        crc       := x"00";
+        outr      <= 'Z';
+        reg_rst   <= '1';
+        sync      := '1';                                        --Always resets to sync
+        reg_shift <= x"00";
+        --pac_fault<='0';
+     elsif sync='1' then
+        pac_count := pac_count+1;
+        if pac_count<DPACK_LEN then                              --Greater then lenght of a single packet
+           outr <= '0';
 
-  elsif pac_count<DPACK_LEN+SYNC_CYCLE then
-  --outr<=sync_clk;                                        --Output clock to Reciever MMCM for Sync
-  outr <= '1';
-  elsif pac_count<DPACK_LEN+SYNC_CYCLE+1 then
-  outr      <= '0';
-  sync      := '0';                                        --End sync
-  pac_count := 0;                                          --Reset Counter
-  reg_rst   <= '0';
-  end if;
+        elsif pac_count<DPACK_LEN+SYNC_CYCLE then
+           --outr<=sync_clk;                                     --Output clock to Reciever MMCM for Sync
+           outr <= '1';
+        elsif pac_count<DPACK_LEN+SYNC_CYCLE+1 then
+           outr      <= '0';
+           sync      := '0';                                     --End sync
+           pac_count := 0;                                       --Reset Counter
+           reg_rst   <= '0';
+        end if;
 
-  elsif pac_count=0 then                                   --Start bit
-  outr      <= '1';
-  pac_count := pac_count+1;
+     elsif pac_count=0 then                                      --Start bit
+        outr      <= '1';
+        pac_count := pac_count+1;
 
-  elsif pac_count=1 then                                   --Silence before storm
-    outr      <= '0';
-    pac_count := pac_count+1;
+     elsif pac_count=1 then                                      --Silence before storm
+        outr      <= '0';
+        pac_count := pac_count+1;
 
-  elsif pac_count<18 then                                  --Stays in loop until 16x(8+1) bit completes
-  if byt_count<8 then
-  outr <= reg_data (byt_count);                            --Output to OUTR sequentialy
-  reg_shift (byt_count) <= '1';                            --Shift target register
+     elsif pac_count<18 then                                     --Stays in loop until 16x(8+1) bit completes
+        if byt_count<8 then
+           outr <= reg_data (byt_count);                         --Output to OUTR sequentialy
+           reg_shift (byt_count) <= '1';                         --Shift target register
 
-  if byt_count>0 then                                      --Resets previous set Shift Bits
-  reg_shift(byt_count-1) <= '0';
-  end if;
+           if byt_count>0 then                                   --Resets previous set Shift Bits
+              reg_shift(byt_count-1) <= '0';
+           end if;
 
-  newcrc(0) := reg_data(byt_count) xor crc(7);             --CRC loops for every bit
-  newcrc(1) := reg_data(byt_count) xor crc(0) xor crc(7);
-  newcrc(2) := reg_data(byt_count) xor crc(1) xor crc(7);
-  newcrc(3) := crc(2);
-  newcrc(4) := crc(3);
-  newcrc(5) := crc(4);
-  newcrc(6) := crc(5);
-  newcrc(7) := crc(6);
-  crc       := newcrc;
+           newcrc(0) := reg_data(byt_count) xor crc(7);          --CRC loops for every bit
+           newcrc(1) := reg_data(byt_count) xor crc(0) xor crc(7);
+           newcrc(2) := reg_data(byt_count) xor crc(1) xor crc(7);
+           newcrc(3) := crc(2);
+           newcrc(4) := crc(3);
+           newcrc(5) := crc(4);
+           newcrc(6) := crc(5);
+           newcrc(7) := crc(6);
+           crc       := newcrc;
+           byt_count := byt_count+1;
+        else                                                    --Extra clock cycle needed @ fast tranmission rates for reset
+           byt_count := 0;
+           outr      <= 'Z';
+           pac_count := pac_count+1;
+           reg_rst   <= '0';
+           reg_shift(7 downto 0) <= x"00";
+         end if;
 
-  byt_count := byt_count+1;
-  else                                                    --Extra clock cycle needed @ fast tranmission rates for reset
-  byt_count := 0;
-  outr      <= 'Z';
-  pac_count := pac_count+1;
-  reg_rst   <= '0';
-  reg_shift(7 downto 0) <= x"00";
-  end if;
+      elsif pac_count<26 then                                  --Output CRC
+         outr      <= crc(pac_count-18);
+         pac_count := pac_count+1;
+         reg_rst   <= '1';
 
-  elsif pac_count<26 then                              --Output CRC
-  outr      <= crc(pac_count-18);
-  pac_count := pac_count+1;
-  reg_rst   <= '1';
+      elsif pac_count=26 then                              --1 cycles for Reciever to check CRC and drive the line
+         outr      <= 'Z';
+         reg_rst   <= '0';
+         pac_count := pac_count+1;
 
-  elsif pac_count=26 then                              --1 cycles for Reciever to check CRC and drive the line
-  outr      <= 'Z';
-  reg_rst   <= '0';
-  pac_count := pac_count+1;
+      elsif pac_count=27  then                             --Input from reciever
+         --  pac_fault <= outr;
+         pac_count := pac_count+1;
 
-  elsif pac_count=27  then                            --Input from reciever
-  --  pac_fault <= outr;
-  pac_count := pac_count+1;
-
-  elsif pac_count=28 then                              --time to reset
-  pac_count := 0;
-  outr      <= 'Z';
-  newcrc    := "00000000";
-  crc       := "00000000";
-  --pac_fault <= '0';
-  end if;
-  crc_data <= crc;                                --Just for troubleshooting
-  regdata  <= reg_data;
+      elsif pac_count=28 then                              --time to reset
+         pac_count := 0;
+         outr      <= 'Z';
+         newcrc    := "00000000";
+         crc       := "00000000";
+         --pac_fault <= '0';
+      end if;
+      crc_data <= crc;                                     --Just for troubleshooting
+      regdata  <= reg_data;
   end if;
 end process;
 
@@ -142,48 +141,48 @@ reg_proc : process(reg_shift,reg_rst,reg_data,clk) is     --Process to shift,res
   variable reg_5 : std_logic_vector(15 downto 0):=x"0AAA";
   variable reg_6 : std_logic_vector(15 downto 0):=x"98FF";
   variable reg_7 : std_logic_vector(15 downto 0):=x"1234";
-      variable temp  : unsigned(15 downto 0);
+  variable temp  : unsigned(15 downto 0);
 begin
   if falling_edge(clk) then
-  if reg_shift(0)='1' then
-  reg_0       := rand_shift(reg_0);
-  reg_data(0) <= reg_0(15);                          --updating data
-  end if;
+     if reg_shift(0)='1' then
+        reg_0       := rand_shift(reg_0);
+        reg_data(0) <= reg_0(15);                          --updating data
+     end if;
 
-  if reg_shift(1)='1' then
-  reg_1       := rand_shift(reg_1);
-  reg_data(1) <= reg_1(15);
-  end if;
+     if reg_shift(1)='1' then
+        reg_1       := rand_shift(reg_1);
+        reg_data(1) <= reg_1(15);
+     end if;
 
-  if reg_shift(2)='1' then
-  reg_2       := rand_shift(reg_2);
-  reg_data(2) <= reg_2(15);
-  end if;
+     if reg_shift(2)='1' then
+        reg_2       := rand_shift(reg_2);
+        reg_data(2) <= reg_2(15);
+     end if;
 
-  if reg_shift(3)='1' then
-  reg_3       := rand_shift(reg_3);
-  reg_data(3) <= reg_3(15);
-  end if;
+     if reg_shift(3)='1' then
+        reg_3       := rand_shift(reg_3);
+        reg_data(3) <= reg_3(15);
+     end if;
 
-  if reg_shift(4)='1' then
-  reg_4       := rand_shift(reg_4);
-  reg_data(4) <= reg_4(15);
-  end if;
+     if reg_shift(4)='1' then
+        reg_4       := rand_shift(reg_4);
+        reg_data(4) <= reg_4(15);
+     end if;
 
-  if reg_shift(5)='1' then
-  reg_5       := rand_shift(reg_5);
-  reg_data(5) <= reg_5(15);
-  end if;
+     if reg_shift(5)='1' then
+        reg_5       := rand_shift(reg_5);
+        reg_data(5) <= reg_5(15);
+     end if;
 
-  if reg_shift(6)='1' then
-  reg_6       := rand_shift(reg_6);
-  reg_data(6) <= reg_6(15);
-  end if;
+     if reg_shift(6)='1' then
+        reg_6       := rand_shift(reg_6);
+        reg_data(6) <= reg_6(15);
+     end if;
 
-  if reg_shift(7)='1' then
-  reg_7       := rand_shift(reg_7);
-  reg_data(7) <= reg_7(15);
-  end if;
+     if reg_shift(7)='1' then
+        reg_7       := rand_shift(reg_7);
+        reg_data(7) <= reg_7(15);
+     end if;
 
 
 
@@ -193,25 +192,25 @@ begin
     --reg_data(7)<=reg_7(15);
 
   if reg_rst='1' then
-         reg_0 := x"040C";
-  reg_1 := x"F0A1";
-  reg_2 := x"ABCD";
-  reg_3 := x"BCDF";
-  reg_4 := x"51A2";
-  reg_5 := x"0AAA";
-  reg_6 := x"98FF";
-  reg_7 := x"1234";
+     reg_0 := x"040C";
+     reg_1 := x"F0A1";
+     reg_2 := x"ABCD";
+     reg_3 := x"BCDF";
+     reg_4 := x"51A2";
+     reg_5 := x"0AAA";
+     reg_6 := x"98FF";
+     reg_7 := x"1234";
 
-  reg_data(0) <= reg_0(15);
-  reg_data(1) <= reg_1(15);
-  reg_data(2) <= reg_2(15);
-  reg_data(3) <= reg_3(15);
-  reg_data(4) <= reg_4(15);
-  reg_data(5) <= reg_5(15);
-  reg_data(6) <= reg_6(15);
-  reg_data(7) <= reg_7(15);
+     reg_data(0) <= reg_0(15);
+     reg_data(1) <= reg_1(15);
+     reg_data(2) <= reg_2(15);
+     reg_data(3) <= reg_3(15);
+     reg_data(4) <= reg_4(15);
+     reg_data(5) <= reg_5(15);
+     reg_data(6) <= reg_6(15);
+     reg_data(7) <= reg_7(15);
   end if;
-  end if;
+end if;
 
 end process;
 sync_clk <= clk;
