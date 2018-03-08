@@ -1,6 +1,6 @@
 ------------------------------------------------------------------------------
--- Transceiver.vhd
---
+-- Tran_testr.vhd
+-- Test bench for Transceiver
 --  Version 1.0
 --
 --  Copyright (C) 2018 Arun Malik
